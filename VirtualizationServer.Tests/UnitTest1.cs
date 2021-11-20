@@ -1,6 +1,6 @@
 ﻿using NUnit.Framework;
 
-namespace VirtualizationServer.Tests
+namespace OneClickDesktop.RabbitModule.VirtualizationServer.Tests
 {
     public class Tests
     {

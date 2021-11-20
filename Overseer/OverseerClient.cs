@@ -1,10 +1,10 @@
 ﻿using System;
-using Common;
+using OneClickDesktop.RabbitModule.Common;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
-using Constants = Common.Constants;
+using Constants = OneClickDesktop.RabbitModule.Common.Constants;
 
-namespace Overseer
+namespace OneClickDesktop.RabbitModule.Overseer
 {
     public class OverseerClient: AbstractRabbitClient
     {

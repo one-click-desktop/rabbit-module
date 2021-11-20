@@ -1,6 +1,6 @@
-﻿using Common;
+﻿using OneClickDesktop.RabbitModule.Common;
 
-namespace VirtualizationServer
+namespace OneClickDesktop.RabbitModule.VirtualizationServer
 {
     public class HeartbeatClient: AbstractRabbitClient
     {

@@ -1,10 +1,10 @@
 ﻿using System;
-using Common;
+using OneClickDesktop.RabbitModule.Common;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
-using Constants = Common.Constants;
+using Constants = OneClickDesktop.RabbitModule.Common.Constants;
 
-namespace VirtualizationServer
+namespace OneClickDesktop.RabbitModule.VirtualizationServer
 {
     public class VirtualizationServerClient: AbstractRabbitClient
     {

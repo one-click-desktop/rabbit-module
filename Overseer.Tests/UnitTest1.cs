@@ -1,6 +1,6 @@
 ﻿using NUnit.Framework;
 
-namespace Overseer.Tests
+namespace OneClickDesktop.RabbitModule.Overseer.Tests
 {
     public class Tests
     {

@@ -1,4 +1,4 @@
-﻿namespace Common
+﻿namespace OneClickDesktop.RabbitModule.Common
 {
     public static class Constants
     {

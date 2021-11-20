@@ -3,7 +3,7 @@ using System.Text.Json;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 
-namespace Common
+namespace OneClickDesktop.RabbitModule.Common
 {
     public class AbstractRabbitClient : IDisposable
     {

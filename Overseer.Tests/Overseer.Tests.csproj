@@ -15,6 +15,7 @@
     </ItemGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\Common.Tests\Common.Tests.csproj" />
       <ProjectReference Include="..\Overseer\Overseer.csproj" />
     </ItemGroup>
 

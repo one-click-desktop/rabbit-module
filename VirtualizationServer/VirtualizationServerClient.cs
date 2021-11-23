@@ -8,39 +8,50 @@ namespace OneClickDesktop.RabbitModule.VirtualizationServer
 {
     public class VirtualizationServerClient: AbstractRabbitClient
     {
-        private string queueName;
+        public string DirectQueueName { get; private set; }
         
         /// <summary>
-        /// Creates RabbitMQ client for Overseer and establishes connection
+        /// Creates RabbitMQ client for Virtual Server and establishes connection
         /// </summary>
         /// <param name="hostname">Hostname of RabbitMQ server</param>
         /// <param name="port">RabbitMQ server port</param>
-        /// <param name="directHandler">Handler for messages received directly. Needs to acknowledge message</param>
-        /// <param name="commonHandler">Handler for messages received on common virtualization servers exchange</param>
-        protected VirtualizationServerClient(string hostname, int port, 
-                                             EventHandler<MessageEventArgs> directHandler,
-                                             EventHandler<MessageEventArgs> commonHandler)
+        public VirtualizationServerClient(string hostname, int port)
             : base(hostname, port)
         {
-            BindToCommonExchange(commonHandler);
-            BindToDirectExchange(directHandler);
+            BindToCommonExchange();
+            BindToDirectExchange();
         }
 
-        private void BindToCommonExchange(EventHandler<MessageEventArgs> commonHandler)
+        /// <summary>
+        /// Event raised when direct message is received
+        /// </summary>
+        public event EventHandler<MessageEventArgs> DirectReceived;
+        
+        /// <summary>
+        /// Event raised when common message is received
+        /// </summary>
+        public event EventHandler<MessageEventArgs> CommonReceived;
+
+        private void BindToCommonExchange()
         {
-            queueName = BindAnonymousQueue(Constants.Exchanges.VirtServersCommon, "");
-            Consume(queueName, true, commonHandler);
+            var queueName = BindAnonymousQueue(Constants.Exchanges.VirtServersCommon, "");
+            Consume(queueName, false, (sender, args) => CommonReceived?.Invoke(sender, args));
         }
         
-        private void BindToDirectExchange(EventHandler<MessageEventArgs> directHandler)
+        private void BindToDirectExchange()
         {
-            queueName = BindAnonymousQueue(Constants.Exchanges.VirtServersDirect, null);
-            Consume(queueName, false, directHandler);
+            DirectQueueName = BindAnonymousQueue(Constants.Exchanges.VirtServersDirect, null);
+            Consume(DirectQueueName, false, (sender, args) => DirectReceived?.Invoke(sender, args));
         }
-
-        public void SendToOverseers(Object message)
+        
+        /// <summary>
+        /// Send message to all overseers
+        /// </summary>
+        /// <param name="message">Message body</param>
+        /// <param name="type">Type of message</param>
+        public void SendToOverseers(object message, string type)
         {
-            Publish(Constants.Exchanges.Overseers, "", null, message);
+            Publish(Constants.Exchanges.Overseers, "", type, message);
         }
     }
 }

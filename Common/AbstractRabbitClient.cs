@@ -22,6 +22,15 @@ namespace OneClickDesktop.RabbitModule.Common
         }
 
         /// <summary>
+        /// Function responsible for restoring channel to new one
+        /// </summary>
+        protected void RestoreChannel()
+        {
+            Channel = connection.CreateModel();
+            Channel.BasicQos(0, 1, false);
+        }
+
+        /// <summary>
         /// Creates and binds anonymous queue to specified exchange with routing key
         /// </summary>
         /// <param name="exchangeName">Name of exchange</param>
@@ -76,7 +85,7 @@ namespace OneClickDesktop.RabbitModule.Common
             Channel.BasicPublish(exchangeName, routingKey, props, body);
         }
 
-        protected IBasicProperties CreateProperties(string type)
+        private IBasicProperties CreateProperties(string type)
         {
             var props = Channel.CreateBasicProperties();
             props.Type = type;

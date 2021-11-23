@@ -14,7 +14,7 @@ namespace OneClickDesktop.RabbitModule.Overseer
         /// <param name="hostname">Hostname of RabbitMQ server</param>
         /// <param name="port">RabbitMQ server port</param>
         /// <param name="handler">Handler for messages received on common Overseer exchange</param>
-        protected OverseerClient(string hostname, int port, EventHandler<BasicDeliverEventArgs> handler)
+        protected OverseerClient(string hostname, int port, EventHandler<MessageEventArgs> handler)
             : base(hostname, port)
         {
             BindToOverseersExchange(handler);
@@ -22,7 +22,7 @@ namespace OneClickDesktop.RabbitModule.Overseer
             CreateVirtServersDirectExchange();
         }
 
-        private void BindToOverseersExchange(EventHandler<BasicDeliverEventArgs> handler)
+        private void BindToOverseersExchange(EventHandler<MessageEventArgs> handler)
         {
             Channel.ExchangeDeclare(Constants.Exchanges.Overseers, ExchangeType.Fanout);
 

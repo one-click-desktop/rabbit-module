@@ -7,8 +7,8 @@ namespace OneClickDesktop.RabbitModule.Common
 {
     public class AbstractRabbitClient : IDisposable
     {
-        private ConnectionFactory factory;
-        private IConnection connection;
+        private readonly ConnectionFactory factory;
+        private readonly IConnection connection;
 
         protected IModel Channel { get; private set; }
         
@@ -39,13 +39,25 @@ namespace OneClickDesktop.RabbitModule.Common
         /// Starts consuming from specified queue with specified handler
         /// </summary>
         /// <param name="queueName">Name of queue to consume from</param>
-        /// <param name="autoAck">Automatically acknowledge messages. If false, handler needs to acknowledge</param>
+        /// <param name="autoAck">Automatically acknowledge messages</param>
         /// <param name="handler"></param>
-        protected void Consume(string queueName, bool autoAck, EventHandler<BasicDeliverEventArgs> handler)
+        protected void Consume(string queueName, bool autoAck, EventHandler<MessageEventArgs> handler)
         {
-            //TODO: create better handler mechanism (wrap handler call in predefined handler)
             var consumer = new EventingBasicConsumer(Channel);
-            consumer.Received += handler;
+            consumer.Received += (model, ea) =>
+            {
+                var body = ea.Body.ToArray();
+                var message = JsonSerializer.Deserialize<object>(body);
+
+                var type = ea.BasicProperties.Type;
+
+                handler(this, new MessageEventArgs(message, type));
+
+                if (!autoAck)
+                {
+                    Channel.BasicAck(ea.DeliveryTag, false);
+                }
+            };
             Channel.BasicConsume(queueName, autoAck, consumer);
         }
         
@@ -56,16 +68,29 @@ namespace OneClickDesktop.RabbitModule.Common
         /// <param name="routingKey">Routing key used to decide which queue to publish to</param>
         /// <param name="properties">Properties of message</param>
         /// <param name="message">Message body</param>
-        protected void Publish(string exchangeName, string routingKey, IBasicProperties properties, Object message)
+        protected void Publish(string exchangeName, string routingKey, string type, object message)
         {
             var body = JsonSerializer.SerializeToUtf8Bytes(message);
-            Channel.BasicPublish(exchangeName, routingKey, properties, body);
+            var props = CreateProperties(type);
+            
+            Channel.BasicPublish(exchangeName, routingKey, props, body);
+        }
+
+        protected IBasicProperties CreateProperties(string type)
+        {
+            var props = Channel.CreateBasicProperties();
+            props.Type = type;
+
+            return props;
         }
 
         public void Dispose()
         {
-            connection?.Dispose();
+            Channel?.Close();
             Channel?.Dispose();
+            
+            connection?.Close();
+            connection?.Dispose();
         }
     }
 }

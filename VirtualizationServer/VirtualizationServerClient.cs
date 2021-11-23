@@ -18,21 +18,21 @@ namespace OneClickDesktop.RabbitModule.VirtualizationServer
         /// <param name="directHandler">Handler for messages received directly. Needs to acknowledge message</param>
         /// <param name="commonHandler">Handler for messages received on common virtualization servers exchange</param>
         protected VirtualizationServerClient(string hostname, int port, 
-                                             EventHandler<BasicDeliverEventArgs> directHandler,
-                                             EventHandler<BasicDeliverEventArgs> commonHandler)
+                                             EventHandler<MessageEventArgs> directHandler,
+                                             EventHandler<MessageEventArgs> commonHandler)
             : base(hostname, port)
         {
             BindToCommonExchange(commonHandler);
             BindToDirectExchange(directHandler);
         }
 
-        private void BindToCommonExchange(EventHandler<BasicDeliverEventArgs> commonHandler)
+        private void BindToCommonExchange(EventHandler<MessageEventArgs> commonHandler)
         {
             queueName = BindAnonymousQueue(Constants.Exchanges.VirtServersCommon, "");
             Consume(queueName, true, commonHandler);
         }
         
-        private void BindToDirectExchange(EventHandler<BasicDeliverEventArgs> directHandler)
+        private void BindToDirectExchange(EventHandler<MessageEventArgs> directHandler)
         {
             queueName = BindAnonymousQueue(Constants.Exchanges.VirtServersDirect, null);
             Consume(queueName, false, directHandler);

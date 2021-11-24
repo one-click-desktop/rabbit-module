@@ -75,7 +75,7 @@ namespace OneClickDesktop.RabbitModule.Common
         /// </summary>
         /// <param name="exchangeName">Name of exchange</param>
         /// <param name="routingKey">Routing key used to decide which queue to publish to</param>
-        /// <param name="properties">Properties of message</param>
+        /// <param name="type">Type of message</param>
         /// <param name="message">Message body</param>
         protected void Publish(string exchangeName, string routingKey, string type, object message)
         {

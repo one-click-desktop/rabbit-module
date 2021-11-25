@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using OneClickDesktop.RabbitModule.Common;
 using RabbitMQ.Client;
 using Constants = OneClickDesktop.RabbitModule.Common.Constants;
@@ -12,32 +13,34 @@ namespace OneClickDesktop.RabbitModule.Overseer
         /// </summary>
         /// <param name="hostname">Hostname of RabbitMQ server</param>
         /// <param name="port">RabbitMQ server port</param>
-        public OverseerClient(string hostname, int port)
+        /// /// <param name="messageTypeMapping">Dictionary grouping message type as received in Rabbit message with C# type to deserialize into.
+        /// Types not in the dictionary will be skipped.</param>
+        public OverseerClient(string hostname, int port, Dictionary<string, Type> messageTypeMapping)
             : base(hostname, port)
         {
-            BindToOverseersExchange();
+            BindToOverseersExchange(messageTypeMapping);
             CreateVirtServersCommonExchange();
             CreateVirtServersDirectExchange();
         }
 
         public event EventHandler<MessageEventArgs> Received;
 
-        private void BindToOverseersExchange()
+        private void BindToOverseersExchange(Dictionary<string, Type> messageTypeMapping)
         {
-            Channel.ExchangeDeclare(Constants.Exchanges.Overseers, ExchangeType.Fanout);
+            Channel.ExchangeDeclare(Constants.Exchanges.Overseers, ExchangeType.Fanout, autoDelete: true);
 
             var queueName = BindAnonymousQueue(Constants.Exchanges.Overseers, "");
-            Consume(queueName, true, (sender, args) => Received?.Invoke(sender, args));
+            Consume(queueName, true, (sender, args) => Received?.Invoke(sender, args), messageTypeMapping);
         }
 
         private void CreateVirtServersCommonExchange()
         {
-            Channel.ExchangeDeclare(Constants.Exchanges.VirtServersCommon, ExchangeType.Fanout, autoDelete: true);
+            Channel.ExchangeDeclare(Constants.Exchanges.VirtServersCommon, ExchangeType.Fanout, autoDelete: false);
         }
 
         private void CreateVirtServersDirectExchange()
         {
-            Channel.ExchangeDeclare(Constants.Exchanges.VirtServersDirect, ExchangeType.Direct, autoDelete: true);
+            Channel.ExchangeDeclare(Constants.Exchanges.VirtServersDirect, ExchangeType.Direct, autoDelete: false);
         }
         
         /// <summary>

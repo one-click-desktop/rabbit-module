@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using RabbitMQ.Client;
 
 namespace OneClickDesktop.RabbitModule.Common.Tests
@@ -24,9 +25,12 @@ namespace OneClickDesktop.RabbitModule.Common.Tests
             return base.BindAnonymousQueue(exchange, routingKey);
         }
 
-        public new void Consume(string queueName, bool autoAck, EventHandler<MessageEventArgs> handler)
+        public new void Consume(string queueName,
+                                bool autoAck,
+                                EventHandler<MessageEventArgs> handler,
+                                Dictionary<string, Type> messageTypeMapping)
         {
-            base.Consume(queueName, autoAck, handler);
+            base.Consume(queueName, autoAck, handler, messageTypeMapping);
         }
 
         public new void Publish(string exchangeName, string routingKey, string type, object message)

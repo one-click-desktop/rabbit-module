@@ -1,9 +1,8 @@
-﻿using System.Text.Json;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading;
-using System.Threading.Channels;
 using NUnit.Framework;
 using RabbitMQ.Client;
-using RabbitMQ.Client.Events;
 
 namespace OneClickDesktop.RabbitModule.Common.Tests
 {
@@ -40,14 +39,14 @@ namespace OneClickDesktop.RabbitModule.Common.Tests
             
             // when
             var queue = client.BindAnonymousQueue(exchange, routingKey);
-            client.Channel.Consume(queue, (model, msg) =>
+            client.Channel.Consume<string>(queue, (model, msg) =>
             {
                 messageReceived = msg;
                 autoResetEvent.Set();
             });
 
-            var message = "message";
-            client.Channel.SendMessage(exchange, routingKey, message);
+            const string message = "message";
+            client.Channel.SendMessage(exchange, routingKey, message, "string");
             
             // then
             Assert.IsTrue(autoResetEvent.WaitOne());
@@ -66,14 +65,14 @@ namespace OneClickDesktop.RabbitModule.Common.Tests
             
             // when
             var queue = client.BindAnonymousQueue(exchange, null);
-            client.Channel.Consume(queue, (model, msg) =>
+            client.Channel.Consume<string>(queue, (model, msg) =>
             {
                 messageReceived = msg;
                 autoResetEvent.Set();
             });
 
             var message = "message";
-            client.Channel.SendMessage(exchange, queue, message);
+            client.Channel.SendMessage(exchange, queue, message, "string");
             
             // then
             Assert.IsTrue(autoResetEvent.WaitOne());
@@ -91,12 +90,12 @@ namespace OneClickDesktop.RabbitModule.Common.Tests
             var queue = client.Channel.QueueDeclare().QueueName;
             client.Consume(queue, true, (model, msg) =>
             {
-                messageReceived = msg.Message.ToString();
+                messageReceived = (string) msg.Message;
                 autoResetEvent.Set();
-            });
+            }, new Dictionary<string, Type>() {{"string", typeof(string)}});
 
-            var message = "message";
-            client.Channel.SendMessage("", queue, message);
+            const string message = "message";
+            client.Channel.SendMessage("", queue, message, "string");
             
             // then
             Assert.IsTrue(autoResetEvent.WaitOne());
@@ -112,13 +111,13 @@ namespace OneClickDesktop.RabbitModule.Common.Tests
             
             // when
             var queue = client.Channel.QueueDeclare().QueueName;
-            client.Channel.Consume(queue, (model, msg) =>
+            client.Channel.Consume<string>(queue, (model, msg) =>
             {
                 messageReceived = msg;
                 autoResetEvent.Set();
             });
 
-            var message = "message";
+            const string message = "message";
             client.Publish("", queue, null, message);
             
             // then

@@ -1,4 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
 using System.Text.Json;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
@@ -43,22 +46,46 @@ namespace OneClickDesktop.RabbitModule.Common
             
             return queueName;
         }
-        
+
         /// <summary>
         /// Starts consuming from specified queue with specified handler
         /// </summary>
         /// <param name="queueName">Name of queue to consume from</param>
         /// <param name="autoAck">Automatically acknowledge messages</param>
-        /// <param name="handler"></param>
-        protected void Consume(string queueName, bool autoAck, EventHandler<MessageEventArgs> handler)
+        /// <param name="handler">Message handler</param>
+        /// <param name="typeDict">Mapping of message type to C# type</param>
+        protected void Consume(string queueName, bool autoAck, EventHandler<MessageEventArgs> handler, Dictionary<string, Type> typeDict)
         {
             var consumer = new EventingBasicConsumer(Channel);
             consumer.Received += (model, ea) =>
             {
-                var body = ea.Body.ToArray();
-                var message = JsonSerializer.Deserialize<object>(body);
-
+                var body = Encoding.UTF8.GetString(ea.Body.ToArray());
                 var type = ea.BasicProperties.Type;
+
+                if (!typeDict.TryGetValue(type, out var messageType) || messageType == null)
+                {
+                    Console.WriteLine($"Message type {type} unknown");
+                    return;
+                }
+
+                object message = null;
+                try
+                {
+                    var deserializer = typeof(JsonSerializer).GetMethods()
+                                                             .Where(x => x.Name == "Deserialize")
+                                                             .FirstOrDefault(x => x.IsGenericMethod
+                                                                                 && x.GetParameters()[0]
+                                                                                     .ParameterType == typeof(string))
+                                                             ?.MakeGenericMethod(messageType);
+                    message = deserializer?.Invoke(null, new object[] {body, null});
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(
+                        $"Failed to deserialize message of type: {type} to: {messageType.Name}, content: {body}", e);
+                    return;
+                }
+                
 
                 handler(this, new MessageEventArgs(message, type));
 
@@ -89,6 +116,7 @@ namespace OneClickDesktop.RabbitModule.Common
         {
             var props = Channel.CreateBasicProperties();
             props.Type = type;
+            props.ContentType = "application/json";
 
             return props;
         }

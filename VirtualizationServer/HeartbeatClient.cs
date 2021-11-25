@@ -27,8 +27,6 @@ namespace OneClickDesktop.RabbitModule.VirtualizationServer
         public HeartbeatClient(string hostname, int port,
                                   int waitTime = 60000, int checks = 2) : base(hostname, port)
         {
-            this.missingHandler = missingHandler;
-            this.foundHandler = foundHandler;
             this.waitTime = waitTime;
             this.checks = checks;
 
@@ -36,6 +34,7 @@ namespace OneClickDesktop.RabbitModule.VirtualizationServer
             {
                 while (true)
                 {
+                    Console.WriteLine("working");
                     foreach (var queue in queues.Keys)
                     {
                         try
@@ -44,16 +43,21 @@ namespace OneClickDesktop.RabbitModule.VirtualizationServer
                             RestoreChannel();
                             Channel.QueueDeclarePassive(queue);
                         }
-                        catch (OperationInterruptedException e) when(e.ShutdownReason.ReplyCode == 404)
+                        catch (OperationInterruptedException e) when (e.ShutdownReason.ReplyCode == 404)
                         {
                             queues[queue] += 1;
-                            
+
                             // raise event if queue is missing checks times
                             if (queues[queue] == this.checks)
                             {
                                 Missing?.Invoke(this, queue);
                             }
+
                             continue;
+                        }
+                        catch (OperationInterruptedException e) when (e.ShutdownReason.ReplyCode == 405)
+                        {
+                            
                         }
                         
                         // raise event if queue previously reported as missing is found

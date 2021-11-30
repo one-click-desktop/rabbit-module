@@ -6,6 +6,7 @@ using RabbitMQ.Client;
 
 namespace OneClickDesktop.RabbitModule.Common.Tests
 {
+    [TestFixture]
     public class AbstractRabbitClientTest
     {
         private TestRabbitClient client;
@@ -13,7 +14,9 @@ namespace OneClickDesktop.RabbitModule.Common.Tests
         [SetUp]
         public void Setup()
         {
-            client = new TestRabbitClient("localhost", 5672);
+            string rabbitUrl = TestContext.Parameters["RabbitUrl"];
+            int rabbitPort = int.Parse(TestContext.Parameters["RabbitPort"]);
+            client = new TestRabbitClient(rabbitUrl, rabbitPort);
         }
 
         [Test]

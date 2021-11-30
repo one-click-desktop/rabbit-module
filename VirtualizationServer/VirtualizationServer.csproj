@@ -3,6 +3,12 @@
     <PropertyGroup>
         <TargetFramework>net5.0</TargetFramework>
         <RootNamespace>OneClickDesktop.RabbitModule.VirtualizationServer</RootNamespace>
+        <PackageId>OneClickDesktop.RabbitModule.VirtualizationServer</PackageId>
+        <Title>OneClickDesktop.RabbitModule.VirtualizationServer</Title>
+        <Authors>Smogork, Widomskip</Authors>
+        <Description>Library for communication inside OneClickDesktop system for virtualisation server module.</Description>
+        <PackageProjectUrl>https://github.com/one-click-desktop/rabbit-module</PackageProjectUrl>
+        <RepositoryUrl>https://github.com/one-click-desktop/rabbit-module</RepositoryUrl>
     </PropertyGroup>
 
     <ItemGroup>

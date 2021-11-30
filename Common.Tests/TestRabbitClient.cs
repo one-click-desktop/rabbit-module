@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using OneClickDesktop.RabbitModule.Common.EventArgs;
 using RabbitMQ.Client;
 
 namespace OneClickDesktop.RabbitModule.Common.Tests
@@ -10,10 +11,7 @@ namespace OneClickDesktop.RabbitModule.Common.Tests
         {
         }
         
-        public new IModel Channel
-        {
-            get { return base.Channel; }
-        }
+        public new IModel Channel => base.Channel;
 
         public new void RestoreChannel()
         {

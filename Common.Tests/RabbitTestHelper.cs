@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Text;
 using System.Text.Json;
+using System.Threading;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
+using RabbitMQ.Client.Exceptions;
 
 namespace OneClickDesktop.RabbitModule.Common.Tests
 {
@@ -16,6 +18,7 @@ namespace OneClickDesktop.RabbitModule.Common.Tests
             
             channel.BasicPublish(exchange,
                                  routingKey,
+                                 true,
                                  props,
                                  JsonSerializer.SerializeToUtf8Bytes(message));
         }
@@ -38,6 +41,17 @@ namespace OneClickDesktop.RabbitModule.Common.Tests
             channel.QueueBind(queue, exchange, queue);
             channel.Consume<T>(queue, handler);
             return queue;
+        }
+
+        public static void SetOnReturn(this AbstractRabbitClient client, params AutoResetEvent[] autoResetEvents)
+        {
+            client.Return += (sender, args) =>
+            {
+                foreach (var autoResetEvent in autoResetEvents)
+                {
+                    autoResetEvent.Set();
+                }
+            };
         }
     }
 }

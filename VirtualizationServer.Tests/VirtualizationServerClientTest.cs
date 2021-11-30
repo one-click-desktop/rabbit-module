@@ -25,7 +25,7 @@ namespace OneClickDesktop.RabbitModule.VirtualizationServer.Tests
                 5672,
                 new Dictionary<string, Type>() {{"string", typeof(string)}});
         }
-        
+
         [Test, Timeout(3000)]
         public void ShouldRaiseEventWhenCommonMessageReceived()
         {
@@ -41,6 +41,7 @@ namespace OneClickDesktop.RabbitModule.VirtualizationServer.Tests
 
             // when
             const string message = "message";
+            helper.SetOnReturn(autoResetEvent);
             helper.Channel.SendMessage(Constants.Exchanges.VirtServersCommon,
                                        "", message, "string");
             
@@ -64,8 +65,9 @@ namespace OneClickDesktop.RabbitModule.VirtualizationServer.Tests
 
             // when
             const string message = "message";
+            helper.SetOnReturn(autoResetEvent);
             helper.Channel.SendMessage(Constants.Exchanges.VirtServersDirect,
-                                       client.DirectQueueName, 
+                                       client.DirectQueueName,
                                        message, "string");
             
             // then
@@ -101,6 +103,7 @@ namespace OneClickDesktop.RabbitModule.VirtualizationServer.Tests
             
             // when
             const string message = "message";
+            client.SetOnReturn(autoResetEvent1, autoResetEvent2);
             client.SendToOverseers(message, "string");
             
             // then

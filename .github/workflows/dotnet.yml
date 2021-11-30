@@ -10,14 +10,15 @@ jobs:
   build:
 
     runs-on: ubuntu-latest
+
+    services:
+      mqtt:
+        image: rabbitmq
+        ports:
+          - 5672:5672
         
     steps:
     - uses: actions/checkout@v2
-    - name: Start RabbitMQ
-      uses: namoshek/rabbitmq-github-action@v1
-      with:
-        ports: '5672:5672'
-        container-name: 'mqtt'
     - name: Setup .NET
       uses: actions/setup-dotnet@v1
       with:
@@ -27,4 +28,4 @@ jobs:
     - name: Build
       run: dotnet build --no-restore
     - name: Test
-      run: dotnet test --no-build --verbosity normal -s github_actions.runsettings
+      run: dotnet test --no-build --verbosity normal

@@ -10,20 +10,14 @@ jobs:
   build:
 
     runs-on: ubuntu-latest
-          
-    services:
-      mqtt:
-        image: rabbitmq
-        ports:
-          - 5672
         
     steps:
     - uses: actions/checkout@v2
-    #- name: Setup RabbitMQ
-    #  uses: docker/rabbitmq
-    #  with:
-    #    container-name: 'mqtt'
-    #    ports: '5672:5672'
+    - name: Start RabbitMQ
+      uses: namoshek/rabbitmq-github-action@v1
+      with:
+        ports: '5672:5672'
+        container-name: 'mqtt'
     - name: Setup .NET
       uses: actions/setup-dotnet@v1
       with:

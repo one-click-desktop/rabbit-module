@@ -1,8 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using OneClickDesktop.RabbitModule.Common;
-using RabbitMQ.Client;
-using RabbitMQ.Client.Events;
+using OneClickDesktop.RabbitModule.Common.EventArgs;
 using Constants = OneClickDesktop.RabbitModule.Common.Constants;
 
 namespace OneClickDesktop.RabbitModule.VirtualizationServer
@@ -38,13 +37,13 @@ namespace OneClickDesktop.RabbitModule.VirtualizationServer
         private void BindToCommonExchange(Dictionary<string, Type> messageTypeMapping)
         {
             var queueName = BindAnonymousQueue(Constants.Exchanges.VirtServersCommon, "");
-            Consume(queueName, false, (sender, args) => CommonReceived?.Invoke(sender, args), messageTypeMapping);
+            Consume(queueName, true, (sender, args) => CommonReceived?.Invoke(sender, args), messageTypeMapping);
         }
         
         private void BindToDirectExchange(Dictionary<string, Type> messageTypeMapping)
         {
             DirectQueueName = BindAnonymousQueue(Constants.Exchanges.VirtServersDirect, null);
-            Consume(DirectQueueName, false, (sender, args) => DirectReceived?.Invoke(sender, args), messageTypeMapping);
+            Consume(DirectQueueName, true, (sender, args) => DirectReceived?.Invoke(sender, args), messageTypeMapping);
         }
         
         /// <summary>

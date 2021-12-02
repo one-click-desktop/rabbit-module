@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using OneClickDesktop.RabbitModule.Common;
+using OneClickDesktop.RabbitModule.Common.EventArgs;
 using RabbitMQ.Client;
 using Constants = OneClickDesktop.RabbitModule.Common.Constants;
 
@@ -13,7 +14,7 @@ namespace OneClickDesktop.RabbitModule.Overseer
         /// </summary>
         /// <param name="hostname">Hostname of RabbitMQ server</param>
         /// <param name="port">RabbitMQ server port</param>
-        /// /// <param name="messageTypeMapping">Dictionary grouping message type as received in Rabbit message with C# type to deserialize into.
+        /// <param name="messageTypeMapping">Dictionary grouping message type as received in Rabbit message with C# type to deserialize into.
         /// Types not in the dictionary will be skipped.</param>
         public OverseerClient(string hostname, int port, Dictionary<string, Type> messageTypeMapping)
             : base(hostname, port)
@@ -23,6 +24,9 @@ namespace OneClickDesktop.RabbitModule.Overseer
             CreateVirtServersDirectExchange();
         }
 
+        /// <summary>
+        /// Event raised when message is received
+        /// </summary>
         public event EventHandler<MessageEventArgs> Received;
 
         private void BindToOverseersExchange(Dictionary<string, Type> messageTypeMapping)
@@ -58,7 +62,7 @@ namespace OneClickDesktop.RabbitModule.Overseer
         /// </summary>
         /// <param name="queueName">Name of server's queue</param>
         /// <param name="message">Message to publish</param>
-        /// /// <param name="type">Message type</param>
+        /// <param name="type">Message type</param>
         public void SendToVirtServer(string queueName, object message, string type)
         {
             Publish(Constants.Exchanges.VirtServersDirect, queueName, type, message);

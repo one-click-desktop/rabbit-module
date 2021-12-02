@@ -1,0 +1,39 @@
+name: Nuget Publish
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v1
+      - name: Setup dotnet
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: 5.x
+      - name: Check if API version changed before pushing packages
+        run: bash scripts/check-version.sh
+        env:
+          BRANCH: ${{ github.base_ref }}
+      - name: Save current package version
+        run: echo "PACKAGE_VER=`cat package.version`" >> $GITHUB_ENV
+      - name: Build solution
+        run: dotnet build -c Release
+      - name: Pack Overseer project
+        run: dotnet pack -c Release -p:Version="$PACKAGE_VER"
+        working-directory: ./Overseer
+      - name: Push Overseer nuget
+        run: dotnet nuget push "bin/Release/*.Overseer.*.nupkg" --api-key ${{ secrets.NUGET_TOKEN }} --source "https://api.nuget.org/v3/index.json"
+        working-directory: ./Overseer
+      - name: Pack VirtualizationServer project
+        run: dotnet pack -c Release -p:Version="$PACKAGE_VER"
+        working-directory: ./VirtualizationServer
+      - name: Push VirtualizationServer nuget
+        run: dotnet nuget push "bin/Release/*.VirtualizationServer.*.nupkg" --api-key ${{ secrets.NUGET_TOKEN }} --source "https://api.nuget.org/v3/index.json"
+        working-directory: ./VirtualizationServer
+
+  

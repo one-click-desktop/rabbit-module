@@ -6,6 +6,8 @@ using RabbitMQ.Client;
 
 namespace OneClickDesktop.RabbitModule.VirtualizationServer.Tests
 {
+    [TestFixture]
+    [Parallelizable(ParallelScope.None)]
     public class HeartbeatClientTest
     {
         private HeartbeatClient client;
@@ -14,8 +16,10 @@ namespace OneClickDesktop.RabbitModule.VirtualizationServer.Tests
         [SetUp]
         public void Setup()
         {
-            client = new HeartbeatClient("localhost", 5672, 100, 1);
-            helper = new TestRabbitClient("localhost", 5672);
+            string rabbitUrl = TestContext.Parameters["RabbitUrl"];
+            int rabbitPort = int.Parse(TestContext.Parameters["RabbitPort"]);
+            helper = new TestRabbitClient(rabbitUrl, rabbitPort);
+            client = new HeartbeatClient(rabbitUrl, rabbitPort, 100, 1);
         }
 
         [Test, Timeout(2000)]

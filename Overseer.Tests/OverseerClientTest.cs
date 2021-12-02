@@ -7,6 +7,8 @@ using OneClickDesktop.RabbitModule.Common.Tests;
 
 namespace OneClickDesktop.RabbitModule.Overseer.Tests
 {
+    [TestFixture]
+    [Parallelizable(ParallelScope.None)]
     public class OverseerClientTest
     {
         private OverseerClient client;
@@ -15,11 +17,13 @@ namespace OneClickDesktop.RabbitModule.Overseer.Tests
         [SetUp]
         public void Setup()
         {
+            string rabbitUrl = TestContext.Parameters["RabbitUrl"];
+            int rabbitPort = int.Parse(TestContext.Parameters["RabbitPort"]);
             client = new OverseerClient(
-                "localhost",
-                5672,
+                rabbitUrl,
+                rabbitPort,
                 new Dictionary<string, Type>() {{"string", typeof(string)}});
-            helper = new TestRabbitClient("localhost", 5672);
+            helper = new TestRabbitClient(rabbitUrl, rabbitPort);
         }
 
         [Test, Timeout(2000)]

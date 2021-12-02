@@ -8,6 +8,8 @@ using Constants = OneClickDesktop.RabbitModule.Common.Constants;
 
 namespace OneClickDesktop.RabbitModule.VirtualizationServer.Tests
 {
+    [TestFixture]
+    [Parallelizable(ParallelScope.None)]
     public class VirtualizationServerClientTest
     {
         private VirtualizationServerClient client;
@@ -16,13 +18,15 @@ namespace OneClickDesktop.RabbitModule.VirtualizationServer.Tests
         [SetUp]
         public void Setup()
         {
-            helper = new TestRabbitClient("localhost", 5672);
+            string rabbitUrl = TestContext.Parameters["RabbitUrl"];
+            int rabbitPort = int.Parse(TestContext.Parameters["RabbitPort"]);
+            helper = new TestRabbitClient(rabbitUrl, rabbitPort);
             helper.Channel.ExchangeDeclare(Constants.Exchanges.VirtServersCommon, ExchangeType.Fanout);
             helper.Channel.ExchangeDeclare(Constants.Exchanges.VirtServersDirect, ExchangeType.Direct);
             
             client = new VirtualizationServerClient(
-                "localhost",
-                5672,
+                rabbitUrl,
+                rabbitPort,
                 new Dictionary<string, Type>() {{"string", typeof(string)}});
         }
 

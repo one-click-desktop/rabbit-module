@@ -1,7 +1,7 @@
 #! /bin/sh
 
 SOURCE=package.version
-SOURCE_VERSION=$(curl -s https://raw.githubusercontent.com/one-click-desktop/api-module/$BRANCH/$SOURCE)
+SOURCE_VERSION=$(curl -s https://raw.githubusercontent.com/one-click-desktop/rabbit-module/$BRANCH/$SOURCE)
 CURRENT_VERSION=$(cat $SOURCE)
 
 echo Source version:    $SOURCE_VERSION

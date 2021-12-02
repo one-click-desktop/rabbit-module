@@ -7,6 +7,8 @@ using OneClickDesktop.RabbitModule.Common.Tests;
 
 namespace OneClickDesktop.RabbitModule.Overseer.Tests
 {
+    [TestFixture]
+    [Parallelizable(ParallelScope.None)]
     public class OverseerClientTest
     {
         private OverseerClient client;

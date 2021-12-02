@@ -8,6 +8,8 @@ using Constants = OneClickDesktop.RabbitModule.Common.Constants;
 
 namespace OneClickDesktop.RabbitModule.VirtualizationServer.Tests
 {
+    [TestFixture]
+    [Parallelizable(ParallelScope.None)]
     public class VirtualizationServerClientTest
     {
         private VirtualizationServerClient client;

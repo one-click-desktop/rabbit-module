@@ -8,6 +8,7 @@ using RabbitMQ.Client;
 namespace OneClickDesktop.RabbitModule.Common.Tests
 {
     [TestFixture]
+    [Parallelizable(ParallelScope.None)]
     public class AbstractRabbitClientTest
     {
         private TestRabbitClient client;

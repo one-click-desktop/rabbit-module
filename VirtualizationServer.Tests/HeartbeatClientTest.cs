@@ -6,6 +6,8 @@ using RabbitMQ.Client;
 
 namespace OneClickDesktop.RabbitModule.VirtualizationServer.Tests
 {
+    [TestFixture]
+    [Parallelizable(ParallelScope.None)]
     public class HeartbeatClientTest
     {
         private HeartbeatClient client;

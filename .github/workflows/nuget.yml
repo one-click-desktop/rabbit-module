@@ -16,9 +16,9 @@ jobs:
         with:
           dotnet-version: 5.x
       - name: Check if API version changed before pushing packages
-          run: bash scripts/check-version.sh
-          env:
-            BRANCH: ${{ github.base_ref }}
+        run: bash scripts/check-version.sh
+        env:
+          BRANCH: ${{ github.base_ref }}
       - name: Save current package version
         run: echo "PACKAGE_VER=`cat package.version`" >> $GITHUB_ENV
       - name: Build solution

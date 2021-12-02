@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Threading;
 using NUnit.Framework;
+using OneClickDesktop.RabbitModule.Common.EventArgs;
 using RabbitMQ.Client;
 
 namespace OneClickDesktop.RabbitModule.Common.Tests
@@ -49,6 +50,7 @@ namespace OneClickDesktop.RabbitModule.Common.Tests
             });
 
             const string message = "message";
+            client.SetOnReturn(autoResetEvent);
             client.Channel.SendMessage(exchange, routingKey, message, "string");
             
             // then
@@ -75,6 +77,7 @@ namespace OneClickDesktop.RabbitModule.Common.Tests
             });
 
             var message = "message";
+            client.SetOnReturn(autoResetEvent);
             client.Channel.SendMessage(exchange, queue, message, "string");
             
             // then
@@ -98,6 +101,7 @@ namespace OneClickDesktop.RabbitModule.Common.Tests
             }, new Dictionary<string, Type>() {{"string", typeof(string)}});
 
             const string message = "message";
+            client.SetOnReturn(autoResetEvent);
             client.Channel.SendMessage("", queue, message, "string");
             
             // then
@@ -121,11 +125,59 @@ namespace OneClickDesktop.RabbitModule.Common.Tests
             });
 
             const string message = "message";
+            client.SetOnReturn(autoResetEvent);
             client.Publish("", queue, null, message);
             
             // then
             Assert.IsTrue(autoResetEvent.WaitOne());
             Assert.AreEqual(message, messageReceived);
+        }
+        
+        [Test, Timeout(2000)]
+        public void ShouldRaiseReturnedEventWhenNoQueue()
+        {
+            // having
+            var autoResetEvent = new AutoResetEvent(false);
+            var reason = ReturnEventArgs.Reason.UNKNOWN;
+
+            client.Return += (model, args) =>
+            {
+                reason = args.ReturnReason;
+                autoResetEvent.Set();
+            };
+            
+            // when
+            const string queue = "queue123";
+            const string message = "message";
+            client.Channel.SendMessage("", queue, message, "string");
+            
+            // then
+            Assert.IsTrue(autoResetEvent.WaitOne());
+            Assert.AreEqual(ReturnEventArgs.Reason.NO_QUEUE, reason);
+        }
+        
+        [Test, Timeout(2000)]
+        public void ShouldRaiseReturnedEventWhenNoExchange()
+        {
+            // having
+            var autoResetEvent = new AutoResetEvent(false);
+            var reason = ReturnEventArgs.Reason.UNKNOWN;
+
+            client.Return += (model, args) =>
+            {
+                reason = args.ReturnReason;
+                autoResetEvent.Set();
+            };
+            
+            // when
+            const string queue = "queue123";
+            const string exchange = "exchange123";
+            const string message = "message";
+            client.Channel.SendMessage(exchange, queue, message, "string");
+            
+            // then
+            Assert.IsTrue(autoResetEvent.WaitOne());
+            Assert.AreEqual(ReturnEventArgs.Reason.NO_EXCHANGE, reason);
         }
     }
 }

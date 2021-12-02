@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Text.Json;
+using OneClickDesktop.RabbitModule.Common.EventArgs;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 
@@ -19,10 +20,14 @@ namespace OneClickDesktop.RabbitModule.Common
         {
             factory = new ConnectionFactory() {HostName = hostname, Port = port};
             connection = factory.CreateConnection();
-            
-            Channel = connection.CreateModel();
-            Channel.BasicQos(0, 1, false);
+
+            RestoreChannel();
         }
+
+        /// <summary>
+        /// Event raised when message cannot be delivered. If return reason is NO_EXCHANGE 
+        /// </summary>
+        public event EventHandler<ReturnEventArgs> Return;
 
         /// <summary>
         /// Function responsible for restoring channel to new one
@@ -31,6 +36,11 @@ namespace OneClickDesktop.RabbitModule.Common
         {
             Channel = connection.CreateModel();
             Channel.BasicQos(0, 1, false);
+            Channel.BasicReturn += (sender, args) => Return?.Invoke(sender, new ReturnEventArgs(args));
+            Channel.ModelShutdown += (sender, args) =>
+            {
+                Return?.Invoke(sender, new ReturnEventArgs(args));
+            }; 
         }
 
         /// <summary>
@@ -85,8 +95,6 @@ namespace OneClickDesktop.RabbitModule.Common
                         $"Failed to deserialize message of type: {type} to: {messageType.Name}, content: {body}", e);
                     return;
                 }
-                
-
                 handler(this, new MessageEventArgs(message, type));
 
                 if (!autoAck)
@@ -109,7 +117,7 @@ namespace OneClickDesktop.RabbitModule.Common
             var body = JsonSerializer.SerializeToUtf8Bytes(message);
             var props = CreateProperties(type);
             
-            Channel.BasicPublish(exchangeName, routingKey, props, body);
+            Channel.BasicPublish(exchangeName, routingKey, true, props, body);
         }
 
         private IBasicProperties CreateProperties(string type)
@@ -123,6 +131,8 @@ namespace OneClickDesktop.RabbitModule.Common
 
         public void Dispose()
         {
+            GC.SuppressFinalize(this);
+            
             Channel?.Close();
             Channel?.Dispose();
             

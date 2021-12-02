@@ -39,6 +39,7 @@ namespace OneClickDesktop.RabbitModule.Overseer.Tests
             
             // when
             const string message = "message";
+            helper.SetOnReturn(autoResetEvent);
             helper.Channel.SendMessage(Constants.Exchanges.Overseers, "", message, "string");
             
             // then
@@ -63,6 +64,7 @@ namespace OneClickDesktop.RabbitModule.Overseer.Tests
             
             // when
             const string message = "message";
+            client.SetOnReturn(autoResetEvent);
             client.SendToVirtServer(queue, message, "string");
             
             // then
@@ -96,6 +98,7 @@ namespace OneClickDesktop.RabbitModule.Overseer.Tests
             
             // when
             const string message = "message";
+            client.SetOnReturn(autoResetEvent1, autoResetEvent2);
             client.SendToAllVirtServers(message, "string");
             
             // then

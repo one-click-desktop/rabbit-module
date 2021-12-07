@@ -39,7 +39,7 @@ namespace OneClickDesktop.RabbitModule.VirtualizationServer.Tests
             
             client.CommonReceived += (model, msg) =>
             {
-                messageReceived = (string) msg.Message;
+                messageReceived = (string) msg.RabbitMessage.Message;
                 autoResetEvent.Set();
             };
 
@@ -63,7 +63,7 @@ namespace OneClickDesktop.RabbitModule.VirtualizationServer.Tests
             
             client.DirectReceived += (model, msg) =>
             {
-                messageReceived = (string) msg.Message;
+                messageReceived = (string) msg.RabbitMessage.Message;
                 autoResetEvent.Set();
             };
 
@@ -108,7 +108,7 @@ namespace OneClickDesktop.RabbitModule.VirtualizationServer.Tests
             // when
             const string message = "message";
             client.SetOnReturn(autoResetEvent1, autoResetEvent2);
-            client.SendToOverseers(message, "string");
+            client.SendToOverseers(new TestRabbitClient.TestRabbitMessage("string", message));
             
             // then
             Assert.IsTrue(autoResetEvent1.WaitOne());

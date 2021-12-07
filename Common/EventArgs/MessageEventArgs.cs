@@ -1,17 +1,15 @@
 ﻿using System;
+using OneClickDesktop.RabbitModule.Common.RabbitMessage;
 
 namespace OneClickDesktop.RabbitModule.Common.EventArgs
 {
     public class MessageEventArgs : System.EventArgs
     {
-        public object Message { get; }
-        
-        public string Type { get; }
+        public IRabbitMessage RabbitMessage { get; set; }
 
-        public MessageEventArgs(object message, string type)
+        public MessageEventArgs(IRabbitMessage message)
         {
-            Message = message;
-            Type = type;
+            RabbitMessage = message;
         }
     }
 }

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using OneClickDesktop.RabbitModule.Common;
 using OneClickDesktop.RabbitModule.Common.EventArgs;
+using OneClickDesktop.RabbitModule.Common.RabbitMessage;
 using RabbitMQ.Client;
 using Constants = OneClickDesktop.RabbitModule.Common.Constants;
 
@@ -16,7 +17,7 @@ namespace OneClickDesktop.RabbitModule.Overseer
         /// <param name="port">RabbitMQ server port</param>
         /// <param name="messageTypeMapping">Dictionary grouping message type as received in Rabbit message with C# type to deserialize into.
         /// Types not in the dictionary will be skipped.</param>
-        public OverseerClient(string hostname, int port, Dictionary<string, Type> messageTypeMapping)
+        public OverseerClient(string hostname, int port, IReadOnlyDictionary<string, Type> messageTypeMapping)
             : base(hostname, port)
         {
             BindToOverseersExchange(messageTypeMapping);
@@ -29,7 +30,7 @@ namespace OneClickDesktop.RabbitModule.Overseer
         /// </summary>
         public event EventHandler<MessageEventArgs> Received;
 
-        private void BindToOverseersExchange(Dictionary<string, Type> messageTypeMapping)
+        private void BindToOverseersExchange(IReadOnlyDictionary<string, Type> messageTypeMapping)
         {
             Channel.ExchangeDeclare(Constants.Exchanges.Overseers, ExchangeType.Fanout, autoDelete: true);
 
@@ -52,9 +53,9 @@ namespace OneClickDesktop.RabbitModule.Overseer
         /// </summary>
         /// <param name="message">Message to publish</param>
         /// <param name="type">Message type</param>
-        public void SendToAllVirtServers(object message, string type)
+        public void SendToAllVirtServers(IRabbitMessage message)
         {
-            Publish(Constants.Exchanges.VirtServersCommon, "", type, message);
+            Publish(Constants.Exchanges.VirtServersCommon, "", message);
         }
         
         /// <summary>
@@ -63,9 +64,9 @@ namespace OneClickDesktop.RabbitModule.Overseer
         /// <param name="queueName">Name of server's queue</param>
         /// <param name="message">Message to publish</param>
         /// <param name="type">Message type</param>
-        public void SendToVirtServer(string queueName, object message, string type)
+        public void SendToVirtServer(string queueName, IRabbitMessage message)
         {
-            Publish(Constants.Exchanges.VirtServersDirect, queueName, type, message);
+            Publish(Constants.Exchanges.VirtServersDirect, queueName, message);
         }
     }
 }

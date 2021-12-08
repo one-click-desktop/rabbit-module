@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Text.Json;
 using OneClickDesktop.RabbitModule.Common.EventArgs;
+using OneClickDesktop.RabbitModule.Common.RabbitMessage;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 
@@ -64,13 +65,14 @@ namespace OneClickDesktop.RabbitModule.Common
         /// <param name="autoAck">Automatically acknowledge messages</param>
         /// <param name="handler">Message handler</param>
         /// <param name="typeDict">Mapping of message type to C# type</param>
-        protected void Consume(string queueName, bool autoAck, EventHandler<MessageEventArgs> handler, Dictionary<string, Type> typeDict)
+        protected void Consume(string queueName, bool autoAck, EventHandler<MessageEventArgs> handler, IReadOnlyDictionary<string, Type> typeDict)
         {
             var consumer = new EventingBasicConsumer(Channel);
             consumer.Received += (model, ea) =>
             {
                 var body = Encoding.UTF8.GetString(ea.Body.ToArray());
                 var type = ea.BasicProperties.Type;
+                var appId = ea.BasicProperties.AppId;
 
                 if (!typeDict.TryGetValue(type, out var messageType) || messageType == null)
                 {
@@ -95,7 +97,7 @@ namespace OneClickDesktop.RabbitModule.Common
                         $"Failed to deserialize message of type: {type} to: {messageType.Name}, content: {body}", e);
                     return;
                 }
-                handler(this, new MessageEventArgs(message, type));
+                handler(this, new MessageEventArgs(new RabbitMessage.RabbitMessage(appId, type, message)));
 
                 if (!autoAck)
                 {
@@ -110,20 +112,20 @@ namespace OneClickDesktop.RabbitModule.Common
         /// </summary>
         /// <param name="exchangeName">Name of exchange</param>
         /// <param name="routingKey">Routing key used to decide which queue to publish to</param>
-        /// <param name="type">Type of message</param>
-        /// <param name="message">Message body</param>
-        protected void Publish(string exchangeName, string routingKey, string type, object message)
+        /// <param name="message">Message to send with metadata</param>
+        protected void Publish(string exchangeName, string routingKey, IRabbitMessage message)
         {
-            var body = JsonSerializer.SerializeToUtf8Bytes(message);
-            var props = CreateProperties(type);
+            var body = JsonSerializer.SerializeToUtf8Bytes(message.Message);
+            var props = CreateProperties(message.Type, message.AppId);
             
             Channel.BasicPublish(exchangeName, routingKey, true, props, body);
         }
 
-        private IBasicProperties CreateProperties(string type)
+        private IBasicProperties CreateProperties(string type, string appId)
         {
             var props = Channel.CreateBasicProperties();
             props.Type = type;
+            props.AppId = appId;
             props.ContentType = "application/json";
 
             return props;

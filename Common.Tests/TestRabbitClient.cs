@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using OneClickDesktop.RabbitModule.Common.EventArgs;
+using OneClickDesktop.RabbitModule.Common.RabbitMessage;
 using RabbitMQ.Client;
 
 namespace OneClickDesktop.RabbitModule.Common.Tests
@@ -33,7 +34,20 @@ namespace OneClickDesktop.RabbitModule.Common.Tests
 
         public new void Publish(string exchangeName, string routingKey, string type, object message)
         {
-            base.Publish(exchangeName, routingKey, type, message);
+            base.Publish(exchangeName, routingKey, new TestRabbitMessage(type, message));
+        }
+
+        public class TestRabbitMessage : IRabbitMessage
+        {
+            public TestRabbitMessage(string type, object message)
+            {
+                Type = type;
+                Message = message;
+            }
+
+            public string AppId { get; set; }
+            public string Type { get; set; }
+            public object Message { get; set; }
         }
     }
 }

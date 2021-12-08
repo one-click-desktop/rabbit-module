@@ -1,12 +1,13 @@
 name: dotnet package
 
-on: [push]
+on:
+  pull_request:
+    branches:
+      - main
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout
         uses: actions/checkout@v1
@@ -16,3 +17,12 @@ jobs:
           dotnet-version: 5.x
       - name: Build solution
         run: dotnet build -c Release
+  version-check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v1
+      - name: Check if API version changed before pushing packages
+        run: bash scripts/check-version.sh
+        env:
+          BRANCH: ${{ github.base_ref }}

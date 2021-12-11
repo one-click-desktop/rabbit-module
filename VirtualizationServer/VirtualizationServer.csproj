@@ -9,6 +9,7 @@
         <Description>Library for communication inside OneClickDesktop system for virtualisation server module.</Description>
         <PackageProjectUrl>https://github.com/one-click-desktop/rabbit-module</PackageProjectUrl>
         <RepositoryUrl>https://github.com/one-click-desktop/rabbit-module</RepositoryUrl>
+        <AssemblyName>OneClickDesktop.RabbitModule.VirtualizationServer</AssemblyName>
     </PropertyGroup>
 
     <ItemGroup>

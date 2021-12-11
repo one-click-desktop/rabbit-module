@@ -9,6 +9,7 @@
         <PackageProjectUrl>https://github.com/one-click-desktop/rabbit-module</PackageProjectUrl>
         <RepositoryUrl>https://github.com/one-click-desktop/rabbit-module</RepositoryUrl>
         <Description>Library for communication inside OneClickDesktop system for overseer module.</Description>
+        <AssemblyName>OneClickDesktop.RabbitModule.Overseer</AssemblyName>
     </PropertyGroup>
 
     <ItemGroup>

@@ -97,7 +97,7 @@ namespace OneClickDesktop.RabbitModule.Common.Tests
             var queue = client.Channel.QueueDeclare().QueueName;
             client.Consume(queue, true, (model, msg) =>
             {
-                messageReceived = (string) msg.RabbitMessage.Message;
+                messageReceived = (string) msg.RabbitMessage.MessageBody;
                 autoResetEvent.Set();
             }, new Dictionary<string, Type>() {{"string", typeof(string)}});
 

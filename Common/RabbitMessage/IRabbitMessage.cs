@@ -2,8 +2,8 @@
 {
     public interface IRabbitMessage
     {
-        string AppId { get; set; }
-        string Type { get; set; }
-        object Message { get; set; }
+        string SenderIdentifier { get; set; }
+        string MessageType { get; set; }
+        object MessageBody { get; set; }
     }
 }

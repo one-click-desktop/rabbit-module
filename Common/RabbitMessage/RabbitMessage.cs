@@ -2,15 +2,15 @@
 {
     internal class RabbitMessage : IRabbitMessage
     {
-        public string AppId { get; set; }
-        public string Type { get; set; }
-        public object Message { get; set; }
+        public string SenderIdentifier { get; set; }
+        public string MessageType { get; set; }
+        public object MessageBody { get; set; }
 
         internal RabbitMessage(string appId, string type, object message)
         {
-            AppId = appId;
-            Type = type;
-            Message = message;
+            SenderIdentifier = appId;
+            MessageType = type;
+            MessageBody = message;
         }
     }
 }

@@ -41,13 +41,13 @@ namespace OneClickDesktop.RabbitModule.Common.Tests
         {
             public TestRabbitMessage(string type, object message)
             {
-                Type = type;
-                Message = message;
+                MessageType = type;
+                MessageBody = message;
             }
 
-            public string AppId { get; set; }
-            public string Type { get; set; }
-            public object Message { get; set; }
+            public string SenderIdentifier { get; set; }
+            public string MessageType { get; set; }
+            public object MessageBody { get; set; }
         }
     }
 }

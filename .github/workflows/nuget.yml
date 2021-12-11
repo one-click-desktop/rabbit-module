@@ -17,17 +17,14 @@ jobs:
           dotnet-version: 5.x
       - name: Save current package version
         run: echo "PACKAGE_VER=`cat package.version`" >> $GITHUB_ENV
-      - name: Build solution
-        run: dotnet build -c Release
-      - name: Pack Overseer project
+      - name: Build & pack solution
         run: dotnet pack -c Release -p:Version="$PACKAGE_VER"
-        working-directory: ./Overseer
+      - name: Push Common nuget
+        run: dotnet nuget push "bin/Release/*.Common.*.nupkg" --api-key ${{ secrets.NUGET_TOKEN }} --source "https://api.nuget.org/v3/index.json"
+        working-directory: ./Common
       - name: Push Overseer nuget
         run: dotnet nuget push "bin/Release/*.Overseer.*.nupkg" --api-key ${{ secrets.NUGET_TOKEN }} --source "https://api.nuget.org/v3/index.json"
         working-directory: ./Overseer
-      - name: Pack VirtualizationServer project
-        run: dotnet pack -c Release -p:Version="$PACKAGE_VER"
-        working-directory: ./VirtualizationServer
       - name: Push VirtualizationServer nuget
         run: dotnet nuget push "bin/Release/*.VirtualizationServer.*.nupkg" --api-key ${{ secrets.NUGET_TOKEN }} --source "https://api.nuget.org/v3/index.json"
         working-directory: ./VirtualizationServer

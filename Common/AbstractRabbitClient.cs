@@ -136,8 +136,8 @@ namespace OneClickDesktop.RabbitModule.Common
         /// <param name="message">Message to send with metadata</param>
         protected void Publish(string exchangeName, string routingKey, IRabbitMessage message)
         {
-            var body = JsonSerializer.SerializeToUtf8Bytes(message.MessageBody);
-            var props = CreateProperties(message.MessageType, message.SenderIdentifier);
+            var body = JsonSerializer.SerializeToUtf8Bytes(message.Body);
+            var props = CreateProperties(message.Type, message.SenderIdentifier);
             
             Channel.BasicPublish(exchangeName, routingKey, true, props, body);
         }

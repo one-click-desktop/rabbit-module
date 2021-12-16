@@ -110,6 +110,29 @@ namespace OneClickDesktop.RabbitModule.Common.Tests
             Assert.AreEqual(message, messageReceived);
         }
 
+        [Test, Timeout(2000)] public void ShouldReturnNullWhenMessageIsEmpty()
+        {
+            // having
+            var autoResetEvent = new AutoResetEvent(false);
+            var messageReceived = string.Empty;
+            
+            // when
+            var queue = client.Channel.QueueDeclare().QueueName;
+            client.Consume(queue, true, (model, msg) =>
+            {
+                messageReceived = (string) msg.RabbitMessage.MessageBody;
+                autoResetEvent.Set();
+            }, new Dictionary<string, Type>() {{"string", typeof(string)}});
+
+            const string message = null;
+            client.SetOnReturn(autoResetEvent);
+            client.Channel.SendMessage("", queue, message, "string");
+            
+            // then
+            Assert.IsTrue(autoResetEvent.WaitOne());
+            Assert.IsNull(messageReceived);
+        }
+
         [Test, Timeout(2000)]
         public void PublishShouldPublishMessageToExchangeWithRoutingKey()
         {

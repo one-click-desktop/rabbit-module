@@ -35,7 +35,7 @@ namespace OneClickDesktop.RabbitModule.Overseer.Tests
             
             client.Received += (model, msg) =>
             {
-                messageReceived = (string) msg.RabbitMessage.Message;
+                messageReceived = (string) msg.RabbitMessage.MessageBody;
                 autoResetEvent.Set();
             };
             

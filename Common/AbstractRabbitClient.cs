@@ -7,6 +7,8 @@ using OneClickDesktop.RabbitModule.Common.EventArgs;
 using OneClickDesktop.RabbitModule.Common.RabbitMessage;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
+using OneClickDesktop.RabbitModule.Common.Exceptions;
+using RabbitMQ.Client.Exceptions;
 
 namespace OneClickDesktop.RabbitModule.Common
 {
@@ -20,7 +22,15 @@ namespace OneClickDesktop.RabbitModule.Common
         protected AbstractRabbitClient(string hostname, int port)
         {
             factory = new ConnectionFactory() {HostName = hostname, Port = port};
-            connection = factory.CreateConnection();
+
+            try
+            {
+                connection = factory.CreateConnection();
+            }
+            catch (BrokerUnreachableException ex)
+            {
+                throw new BrokerConnectionException(ex.Message);
+            }
 
             RestoreChannel();
         }
@@ -53,8 +63,17 @@ namespace OneClickDesktop.RabbitModule.Common
         protected string BindAnonymousQueue(string exchangeName, string routingKey)
         {
             var queueName = Channel.QueueDeclare().QueueName;
-            Channel.QueueBind(queueName, exchangeName, routingKey ?? queueName);
             
+            // throw if no exchange
+            try
+            {
+                Channel.QueueBind(queueName, exchangeName, routingKey ?? queueName);
+            }
+            catch (OperationInterruptedException ex) when(ex.ShutdownReason.ReplyCode == 404)
+            {
+                throw new MissingExchangeException(ex.ShutdownReason.ReplyText);
+            }
+
             return queueName;
         }
 
@@ -76,6 +95,7 @@ namespace OneClickDesktop.RabbitModule.Common
 
                 if (!typeDict.TryGetValue(type, out var messageType) || messageType == null)
                 {
+                    // TODO: [LOG]
                     Console.WriteLine($"Message type {type} unknown");
                     return;
                 }
@@ -93,6 +113,7 @@ namespace OneClickDesktop.RabbitModule.Common
                 }
                 catch (Exception e)
                 {
+                    // TODO: [LOG]
                     Console.WriteLine(
                         $"Failed to deserialize message of type: {type} to: {messageType.Name}, content: {body}", e);
                     return;
@@ -115,8 +136,8 @@ namespace OneClickDesktop.RabbitModule.Common
         /// <param name="message">Message to send with metadata</param>
         protected void Publish(string exchangeName, string routingKey, IRabbitMessage message)
         {
-            var body = JsonSerializer.SerializeToUtf8Bytes(message.Message);
-            var props = CreateProperties(message.Type, message.AppId);
+            var body = JsonSerializer.SerializeToUtf8Bytes(message.MessageBody);
+            var props = CreateProperties(message.MessageType, message.SenderIdentifier);
             
             Channel.BasicPublish(exchangeName, routingKey, true, props, body);
         }

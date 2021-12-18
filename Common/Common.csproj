@@ -6,6 +6,9 @@
         <AssemblyName>OneClickDesktop.RabbitModule.Common</AssemblyName>
         <IsPackable>true</IsPackable>
     </PropertyGroup>
+    <PropertyGroup>
+      <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    </PropertyGroup>
 
     <ItemGroup>
       <PackageReference Include="RabbitMQ.Client" Version="6.2.2" />

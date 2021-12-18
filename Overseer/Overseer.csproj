@@ -11,6 +11,9 @@
         <Description>Library for communication inside OneClickDesktop system for overseer module.</Description>
         <AssemblyName>OneClickDesktop.RabbitModule.Overseer</AssemblyName>
     </PropertyGroup>
+    <PropertyGroup>
+      <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    </PropertyGroup>
 
     <ItemGroup>
       <ProjectReference Include="..\Common\Common.csproj" />

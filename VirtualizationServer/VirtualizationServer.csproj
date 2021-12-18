@@ -11,7 +11,9 @@
         <RepositoryUrl>https://github.com/one-click-desktop/rabbit-module</RepositoryUrl>
         <AssemblyName>OneClickDesktop.RabbitModule.VirtualizationServer</AssemblyName>
     </PropertyGroup>
-
+    <PropertyGroup>
+      <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    </PropertyGroup>
     <ItemGroup>
       <ProjectReference Include="..\Common\Common.csproj" />
     </ItemGroup>

@@ -24,6 +24,7 @@ namespace OneClickDesktop.RabbitModule.Common.EventArgs
             Message = message;
             ReturnReason = replyCode switch
             {
+                200 => Reason.OK,
                 312 => Reason.NO_QUEUE,
                 404 => Reason.NO_EXCHANGE,
                 _ => Reason.UNKNOWN
@@ -44,7 +45,8 @@ namespace OneClickDesktop.RabbitModule.Common.EventArgs
         {
             NO_QUEUE,
             NO_EXCHANGE,
-            UNKNOWN
+            UNKNOWN,
+            OK
         }
     }
 }

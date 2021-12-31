@@ -8,11 +8,13 @@ using RabbitMQ.Client.Exceptions;
 
 namespace OneClickDesktop.RabbitModule.VirtualizationServer
 {
-    public class HeartbeatClient: AbstractRabbitClient, IDisposable
+    public class HeartbeatClient : AbstractRabbitClient, IDisposable
     {
         private readonly int waitTime;
         private readonly int checks;
-        private readonly ConcurrentDictionary<string, int> queues = new ConcurrentDictionary<string, int>();
+
+        private readonly ConcurrentDictionary<string, (int missing, bool found)> queues =
+            new ConcurrentDictionary<string, (int missing, bool found)>();
         private readonly Task checkTask;
         private readonly EventHandler<string> missingHandler;
         private readonly EventHandler<string> foundHandler;
@@ -25,7 +27,7 @@ namespace OneClickDesktop.RabbitModule.VirtualizationServer
         /// <param name="waitTime">Wait time in milliseconds between checks</param>
         /// <param name="checks">Checks before counting queue as missing</param>
         public HeartbeatClient(string hostname, int port,
-                                  int waitTime = 60000, int checks = 2) : base(hostname, port)
+            int waitTime = 60000, int checks = 2) : base(hostname, port)
         {
             this.waitTime = waitTime;
             this.checks = checks;
@@ -37,6 +39,7 @@ namespace OneClickDesktop.RabbitModule.VirtualizationServer
                     Console.WriteLine("working");
                     foreach (var queue in queues.Keys)
                     {
+                        var (missing, found) = queues[queue];
                         try
                         {
                             // channel is broken after previous try
@@ -45,10 +48,10 @@ namespace OneClickDesktop.RabbitModule.VirtualizationServer
                         }
                         catch (OperationInterruptedException e) when (e.ShutdownReason.ReplyCode == 404)
                         {
-                            queues[queue] += 1;
+                            queues[queue] = (missing + 1, found: found);
 
                             // raise event if queue is missing checks times
-                            if (queues[queue] == this.checks)
+                            if (queues[queue].missing == this.checks)
                             {
                                 Missing?.Invoke(this, queue);
                             }
@@ -57,16 +60,15 @@ namespace OneClickDesktop.RabbitModule.VirtualizationServer
                         }
                         catch (OperationInterruptedException e) when (e.ShutdownReason.ReplyCode == 405)
                         {
-                            
                         }
-                        
-                        // raise event if queue previously reported as missing is found
-                        if (queues[queue] >= this.checks)
+
+                        // raise event if queue previously reported as missing is found or first check
+                        if (missing >= this.checks || !found)
                         {
                             Found?.Invoke(this, queue);
                         }
-                        
-                        queues[queue] = 0;
+
+                        queues[queue] = (0, true);
                     }
 
                     Thread.Sleep(this.waitTime);
@@ -79,7 +81,7 @@ namespace OneClickDesktop.RabbitModule.VirtualizationServer
         /// Event raised when queue is declared as missing
         /// </summary>
         public event EventHandler<string> Missing;
-        
+
         /// <summary>
         /// Event raised when queue is found after being declared as missing
         /// </summary>
@@ -92,7 +94,7 @@ namespace OneClickDesktop.RabbitModule.VirtualizationServer
         /// <exception cref="ArgumentException">Throws if queue is already being checked</exception>
         public void RegisterQueue(string queueName)
         {
-            if (!queues.TryAdd(queueName, 0))
+            if (!queues.TryAdd(queueName, (0, false)))
             {
                 throw new ArgumentException("Queue already in collection");
             }

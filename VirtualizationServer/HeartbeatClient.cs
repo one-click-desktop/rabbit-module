@@ -36,7 +36,6 @@ namespace OneClickDesktop.RabbitModule.VirtualizationServer
             {
                 while (true)
                 {
-                    Console.WriteLine("working");
                     foreach (var queue in queues.Keys)
                     {
                         var (missing, found) = queues[queue];
